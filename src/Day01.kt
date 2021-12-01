@@ -2,31 +2,20 @@ typealias Window = Triple<Int, Int, Int>
 
 fun main() {
     fun part1(input: List<String>): Int {
-        return input.map { it.toInt() }
+        return input.asSequence()
+            .map { it.toInt() }
             .zipWithNext()
             .count { it.second > it.first }
     }
 
     fun part2(input: List<String>): Int {
         val depths = input.map { it.toInt() }
-        val windows = mutableListOf<Window>()
 
-        for (i in 2..depths.lastIndex) {
-            val window = Window(depths[i - 2], depths[i - 1], depths[i])
-            windows.add(window)
-        }
-
-        val windowSums = windows.map { it.first + it.second + it.third }
-
-        var increases = 0
-
-        for (i in 0 until windowSums.lastIndex) {
-            if (windowSums[i + 1] > windowSums[i]) {
-                increases++
-            }
-        }
-
-        return increases
+        return (2..depths.lastIndex).asSequence()
+            .map { index -> Window(depths[index - 2], depths[index - 1], depths[index]) }
+            .map { window -> window.first + window.second + window.third }
+            .zipWithNext()
+            .count { it.second > it.first }
     }
 
     // test if implementation meets criteria from the description, like:
