@@ -1,6 +1,15 @@
 fun main() {
     fun part1(input: List<String>): Int {
-        return input.size
+        val depths = input.map { it.toInt() }
+        var increases = 0
+
+        for (i in 0 until depths.lastIndex) {
+            if (depths[i + 1] > depths[i]) {
+                increases++
+            }
+        }
+
+        return increases
     }
 
     fun part2(input: List<String>): Int {
