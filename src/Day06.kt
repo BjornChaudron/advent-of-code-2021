@@ -1,38 +1,45 @@
 fun main() {
-    fun part1(input: List<String>): Int {
-        val fish = input.first().split(",").map { it.toInt() }
+    fun part1(input: List<String>): Long {
+        val fish = parseInput(input)
         val days = 80
 
         return simulateDays(fish, days)
     }
 
-    fun part2(input: List<String>): Int {
-        return input.size
+    fun part2(input: List<String>): Long {
+        val fish = parseInput(input)
+        val days = 256
+
+        return simulateDays(fish, days)
     }
 
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day06_test")
-    check(part1(testInput) == 5934)
+    check(part1(testInput) == 5934L)
 
     val input = readInput("Day06")
     println(part1(input))
 
-    check(part2(testInput) == 1)
+    check(part2(testInput) == 26984457539L)
     println(part2(input))
 }
 
-fun simulateDays(fish: List<Int>, days: Int): Int {
-    var result = fish.toMutableList()
+fun parseInput(input: List<String>) = input.first().split(",").map { it.toInt() }
 
-    (1..days).forEach { day ->
-        val spawns = result.count { it == 0 }
+fun simulateDays(fish: List<Int>, days: Int): Long {
+    val generations = LongArray(9)
+    fish.forEach { generations[it]++ }
 
-        result = result.map { if (it > 0) it - 1 else 6 }.toMutableList()
+    (1..days).forEach { _ ->
+        val spawns = generations[0]
 
-        repeat(spawns) {
-            result += 8
+        for (i in 1..generations.lastIndex) {
+            generations[i - 1] = generations[i]
         }
+
+        generations[6] += spawns
+        generations[8] = spawns
     }
 
-    return result.size
+    return generations.fold(0L) { acc, next -> acc + next }
 }
