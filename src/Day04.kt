@@ -1,24 +1,10 @@
 fun main() {
     fun part1(input: List<String>): Int {
-        val boardParser = BoardParser()
-
-        val turns = boardParser.parseTurns(input)
-        val boards = boardParser.parseBoards(input)
-
-        turns.forEach { turn ->
-            boards.forEach { b -> b.mark(turn) }
-
-            if (boards.any { it.hasBingo() }) {
-                return boards.first { it.hasBingo() }
-                    .getSumOfUnmarked() * turn
-            }
-        }
-
-        error("No bingo!")
+        return playBingoGame(input).first().let { it.first.getSumOfUnmarked() * it.second }
     }
 
     fun part2(input: List<String>): Int {
-        return input.size
+        return playBingoGame(input).last().let { it.first.getSumOfUnmarked() * it.second }
     }
 
     // test if implementation meets criteria from the description, like:
@@ -28,8 +14,33 @@ fun main() {
     val input = readInput("Day04")
     println(part1(input))
 
-    check(part2(testInput) == 1)
+    check(part2(testInput) == 1924)
     println(part2(input))
+}
+
+fun playBingoGame(input: List<String>): List<Pair<Board, Int>> {
+    val boardParser = BoardParser()
+
+    val turns = boardParser.parseTurns(input)
+    val boards = boardParser.parseBoards(input)
+
+    val remainingBoards = boards.toMutableList()
+    val bingoBoards = mutableListOf<Pair<Board, Int>>()
+
+    turns.forEach { turn ->
+        remainingBoards.forEach { b -> b.mark(turn) }
+
+        if (remainingBoards.any { it.hasBingo() }) {
+            remainingBoards.filter { it.hasBingo() }
+                .let {
+                    remainingBoards.removeAll(it)
+                    it
+                }.map { Pair(it, turn) }
+                .let { bingoBoards.addAll(it) }
+        }
+    }
+
+    return bingoBoards
 }
 
 class BoardParser {
@@ -115,11 +126,11 @@ class Board(numbers: Array<Array<Int>>) {
             .toList()
     }
 
-    fun hasBingo() = hasHorizontalBingo() || hasVerticalBingo()
-
     fun get(cell: Cell): Entry {
         return state[cell]!!
     }
+
+    fun hasBingo() = hasHorizontalBingo() || hasVerticalBingo()
 
     private fun hasHorizontalBingo(): Boolean {
         return (1..width).asSequence()
