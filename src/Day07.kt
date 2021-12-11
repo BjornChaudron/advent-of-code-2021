@@ -2,14 +2,26 @@ import kotlin.math.abs
 
 fun main() {
     fun part1(input: List<Int>): Int {
-        val medianIndex = input.size / 2
-        val median = input.sorted()[medianIndex]
+        val sorted = input.sorted()
 
-        return input.sumOf { abs(median - it) }
+        val median = with(sorted) {
+            if (size % 2 != 0) {
+                this[size / 2]
+            } else {
+                (this[((size - 1) / 2)] + this[(size / 2)]) / 2
+            }
+        }
+
+        return sorted.sumOf { abs(median - it) }
     }
 
     fun part2(input: List<Int>): Int {
-        return input.size
+        return input.sorted().indices.minOf { pos ->
+            input.sumOf {
+                val distance = abs(it - pos)
+                distance * (distance + 1) / 2
+            }
+        }
     }
 
     // test if implementation meets criteria from the description, like:
@@ -19,6 +31,6 @@ fun main() {
     val input = readCsvNumbers("Day07")
     println(part1(input))
 
-    check(part2(testInput) == 1)
+    check(part2(testInput) == 168)
     println(part2(input))
 }
